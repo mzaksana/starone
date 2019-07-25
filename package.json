@@ -1,7 +1,7 @@
 {
-  "name": "startone",
+  "name": "starone",
   "version": "1.0.0",
-  "description": "startone",
+  "description": "starone",
   "main": "main.js",
   "scripts": {
     "start": "electron ."

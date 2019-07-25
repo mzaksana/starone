@@ -1,6 +1,8 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -51,3 +53,44 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+
+app.get('/pesan', function (req, res) {
+  Message.find({}, function (err, pesan) {
+    res.send(pesan);
+  });
+})
+
+app.post('/pesan',async function (req, res) {
+  var message = new Message(req.body);
+
+  var savedMessage = await message.save() //untuk menghandle data besar, supaya antri
+  // sekarang anonymous functionya di dalam then
+  console.log('Tersimpan');
+  var sensor = await Message.findOne({pesan: 'badword'})
+  if (sensor) {
+    await Message.deleteMany({_id: sensor.id});
+  } else {
+    io.emit('pesan', req.body);
+  }
+  res.sendStatus(200);
+
+  //     .catch((err)=>{
+  //     res.sendStatus(500);
+  //     return console(err);
+  // })
+})
+
+
+
+io.on('connection', function (socket) {
+  console.log('a user connected !');
+})
+
+mongoose.connect(dbUrl,function (err) {
+  console.log('berhasil connect ke mlab', err);
+})
+
+var server = http.listen(3000, function () {
+  console.log("port server adalah ",server.address().port)
+});
